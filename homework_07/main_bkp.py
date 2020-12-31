@@ -3,21 +3,13 @@ from random import random, seed
 import numpy as np
 from matplotlib import pyplot as plt
 from math import sqrt
-# from calc_pop import calc_pop
-from calcPop_novoCromossomo import calc_pop
+from calc_pop import calc_pop
 from calc_roletaSimples import calc_roletaSimplesProporcional
 from calc_pontoCorte import calc_pontoCorte
-# from calc_fitness import calc_fitness
-from calc_fitness_novoCromossomo import calc_fitness
+from calc_fitness import calc_fitness
 from calc_mutacao import calc_mutacao
 from to_decimal import to_decimal
 from curvaNivel import plotCurvaNivel
-
-import pickle
-
-print('Pegando dicionário que mapeia os binários para reais')
-dicionario = pickle.load(open("dicionario_final.pkl", "rb"))
-dicionario_copy = dicionario.copy()
 
 from numpy import reshape
 melhores_fitness = []
@@ -51,8 +43,7 @@ populacoes_experimento = []
 for experimento in range(n_experimentos):
     seed(experimento)
     # inicializa a populacao e calcula a fitnesse de cada cromossomo ao mesmo tempo
-    # populacao = calc_pop(len_pop=100, x_inicial=-100, x_final=100, y_inicial=-100, y_final=100, i_experimento=experimento)
-    populacao = calc_pop(len_pop=100, dicionario=dicionario, i_experimento=experimento)
+    populacao = calc_pop(len_pop=100, x_inicial=-100, x_final=100, y_inicial=-100, y_final=100, i_experimento=experimento)
     # populacoes_experimento.append(populacao) # sera usado em trabalhos futuros
     #organiza a populacao pelo ranking: melhor aptidão para pior
     populacao = sorted(populacao, reverse=True)
@@ -81,8 +72,7 @@ for experimento in range(n_experimentos):
         calc_mutacao(pop_filhos)
 
         # calcula a fitness dos filhos e retorna a fitness dos filhos na lista pop_filhos
-        # calc_fitness(pop=pop_filhos)
-        calc_fitness(pop=pop_filhos, dicionario=dicionario)
+        calc_fitness(pop=pop_filhos)
         # print('pop_filhos orndenada pela fitness')
         # print(len(pop_filhos), sorted(pop_filhos, reverse=True))
 
@@ -128,76 +118,74 @@ for i, experimento in enumerate(ensaio):
 
         for i_individuo, individuo in enumerate(geracao):
             if individuo[0] > melhor_individuo[0]:
-                melhor_individuo = [individuo[0], individuo[1], individuo[2], individuo[3], individuo[4],'experimento=' + str(float("%.5f" % float(float(individuo[5])))), 'geracao=' + str(individuo[6])]
+                melhor_individuo = [individuo[0], individuo[1], individuo[2], 'x =' + str(float("%.5f" % to_decimal(individuo[3]))), 'y =' + str(to_decimal(individuo[4])) ,'experimento=' + str(float("%.5f" % float(float(individuo[5])))), 'geracao=' + str(individuo[6])]
                 i_melhor_experimento = i
                 i_melhor_populacao = i_individuo
 
 print('melhor individuo: ', melhor_individuo)
-print('x = ', dicionario[melhor_individuo[3]])
-print('y = ', dicionario[melhor_individuo[4]])
 print('experimento: ', i_melhor_experimento + 1)
 print('populacao: ', i_melhor_populacao + 1)
 
-for i, experimento in enumerate(ensaio):
-
-
-    # plota os gráficos só do melhor experimento
-    if i == i_melhor_experimento:
-
-        for geracao in experimento:
-            # medida de diversidade do experimento
-            for j in range(len(populacao)):
-                medida_diversidade = 0
-                for index in range(len(populacao)):
-                    # soma as diferenças em x e em y
-                    medida_diversidade += abs(to_decimal(populacao[j][1][0]) - to_decimal(populacao[index][1][0]))
-                    medida_diversidade += abs(to_decimal(populacao[j][1][1]) - to_decimal(populacao[index][1][1]))
-
-                y_nivel_diversidade.append(medida_diversidade)
-
-
-            # normalizacao do nível de diversidade para 0 e 1
-            maximo = max(y_nivel_diversidade)
-            for index, nivel in enumerate(y_nivel_diversidade):
-                y_nivel_diversidade[index] = (nivel / maximo)
-
-            for pop in geracao:
-                y_fitness.append(pop[0])
-                y_fitness_media.append(pop[1])
-                y_desvio_padrao.append(pop[2])
-
-        # melhor fitness
-        x = np.arange(1, len(y_fitness) + 1, 1)
-        fig, ax = plt.subplots()
-        ax.plot(x, y_fitness)
-        fig.suptitle('Média das aptidões dos melhores individuos do experimento ' + str(i + 1))  # Add a title so we know which it is
-        plt.xlabel('Geracão')
-        plt.ylabel('Fitness média dos melhores indivíduos')
-        plt.show()
-
-        # fitness_media
-        x = np.arange(1, len(y_fitness_media) + 1, 1)
-        fig, ax = plt.subplots()
-        ax.plot(x, y_fitness_media)
-        fig.suptitle('Média das aptidões médias do experimento ' + str(i + 1))  # Add a title so we know which it is
-        plt.xlabel('Geracão')
-        plt.ylabel('Média da Fitness média')
-        plt.show()
-
-        # desvio_padrao
-        x = np.arange(1, len(y_desvio_padrao) + 1, 1)
-        fig, ax = plt.subplots()
-        ax.plot(x, y_desvio_padrao)
-        fig.suptitle('Média dos desvios padrões das aptidões do experimento ' + str(i + 1))  # Add a title so we know which it is
-        plt.xlabel('Geracão')
-        plt.ylabel('Desvio padrão médio')
-        plt.show()
-
-        # medida_diversidade
-        x = np.arange(1, len(y_nivel_diversidade) + 1, 1)
-        fig, ax = plt.subplots()
-        ax.plot(x, y_nivel_diversidade)
-        fig.suptitle('Medida de diversidade do experimento ' + str(i + 1))  # Add a title so we know which it is
-        plt.xlabel('População')
-        plt.ylabel('Nível de diversidade')
-        plt.show()
+# for i, experimento in enumerate(ensaio):
+#
+#
+#     # plota os gráficos só do melhor experimento
+#     if i == i_melhor_experimento:
+#
+#         for geracao in experimento:
+#             # medida de diversidade do experimento
+#             for j in range(len(populacao)):
+#                 medida_diversidade = 0
+#                 for index in range(len(populacao)):
+#                     # soma as diferenças em x e em y
+#                     medida_diversidade += abs(to_decimal(populacao[j][1][0]) - to_decimal(populacao[index][1][0]))
+#                     medida_diversidade += abs(to_decimal(populacao[j][1][1]) - to_decimal(populacao[index][1][1]))
+#
+#                 y_nivel_diversidade.append(medida_diversidade)
+#
+#
+#             # normalizacao do nível de diversidade para 0 e 1
+#             maximo = max(y_nivel_diversidade)
+#             for index, nivel in enumerate(y_nivel_diversidade):
+#                 y_nivel_diversidade[index] = (nivel / maximo)
+#
+#             for pop in geracao:
+#                 y_fitness.append(pop[0])
+#                 y_fitness_media.append(pop[1])
+#                 y_desvio_padrao.append(pop[2])
+#
+#         # melhor fitness
+#         x = np.arange(1, len(y_fitness) + 1, 1)
+#         fig, ax = plt.subplots()
+#         ax.plot(x, y_fitness)
+#         fig.suptitle('Média das aptidões dos melhores individuos do experimento ' + str(i + 1))  # Add a title so we know which it is
+#         plt.xlabel('Geracão')
+#         plt.ylabel('Fitness média dos melhores indivíduos')
+#         plt.show()
+#
+#         # fitness_media
+#         x = np.arange(1, len(y_fitness_media) + 1, 1)
+#         fig, ax = plt.subplots()
+#         ax.plot(x, y_fitness_media)
+#         fig.suptitle('Média das aptidões médias do experimento ' + str(i + 1))  # Add a title so we know which it is
+#         plt.xlabel('Geracão')
+#         plt.ylabel('Média da Fitness média')
+#         plt.show()
+#
+#         # desvio_padrao
+#         x = np.arange(1, len(y_desvio_padrao) + 1, 1)
+#         fig, ax = plt.subplots()
+#         ax.plot(x, y_desvio_padrao)
+#         fig.suptitle('Média dos desvios padrões das aptidões do experimento ' + str(i + 1))  # Add a title so we know which it is
+#         plt.xlabel('Geracão')
+#         plt.ylabel('Desvio padrão médio')
+#         plt.show()
+#
+#         # medida_diversidade
+#         x = np.arange(1, len(y_nivel_diversidade) + 1, 1)
+#         fig, ax = plt.subplots()
+#         ax.plot(x, y_nivel_diversidade)
+#         fig.suptitle('Medida de diversidade do experimento ' + str(i + 1))  # Add a title so we know which it is
+#         plt.xlabel('População')
+#         plt.ylabel('Nível de diversidade')
+#         plt.show()
